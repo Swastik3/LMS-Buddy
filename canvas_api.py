@@ -1,10 +1,13 @@
+import os 
+from dotenv import load_dotenv
 from canvasapi import Canvas
 import json
 from datetime import datetime, date
 from bs4 import BeautifulSoup
 
+load_dotenv()
 API_URL = "https://umd.instructure.com"
-API_KEY = "1133~EGumCJWevvwkZmNKhDW8YBaQxMG3yvtc8ARQhtWXrEFutKc6XBT4tHGKEFwRxCK8"
+API_KEY = os.getenv("CANVAS_API_KEY")
 
 data = {}
 
