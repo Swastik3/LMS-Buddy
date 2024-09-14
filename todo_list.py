@@ -13,9 +13,10 @@ canvas = Canvas(API_URL, API_KEY)
 user = canvas.get_user('self')
 
 for course in user.get_courses(enrollment_state='active'):
-    for item in course.get_todo_items():
-        print(item.assignment["name"])
-        print("For course: " + item.context_name)
-        due_date = datetime.strptime(item.assignment["due_at"], "%Y-%m-%dT%H:%M:%SZ")
-        print("Due at: " + due_date.strftime("%B %d, %Y %I:%M %p"))
-        print("\n\n")
+    if "comm107" in course.name.lower() or "math240" in course.name.lower() or "math241" in course.name.lower() or "math246" in course.name.lower() or "cmsc351" in course.name.lower() or "cmsc320" in course.name.lower():
+        for item in course.get_todo_items():
+            print(item.assignment["name"])
+            print("For course: " + item.context_name)
+            due_date = datetime.strptime(item.assignment["due_at"], "%Y-%m-%dT%H:%M:%SZ")
+            print("Due at: " + due_date.strftime("%B %d, %Y %I:%M %p"))
+            print("\n\n")

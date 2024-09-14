@@ -16,7 +16,7 @@ data["name"] = user.name
 data["courses"] = {}
 courses = user.get_courses(enrollment_state='active')
 for course in courses:
-    if "comm107" in course.name.lower() or "math240" in course.name.lower() or "math241" in course.name.lower() or "math246" in course.name.lower() or "cmsc351" in course.name.lower():
+    if "comm107" in course.name.lower() or "math240" in course.name.lower() or "math241" in course.name.lower() or "math246" in course.name.lower() or "cmsc351" in course.name.lower() or "cmsc320" in course.name.lower():
         course_data = {}
         course_data["name"] = course.name
         course_data["assignments"] = {}
