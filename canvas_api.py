@@ -75,8 +75,8 @@ for course in courses:
                 pass
             else:
                 raise e
-
-        data["courses"][course.id] = course_data
-
-with open('canvas_data.json', 'w') as outfile:
-    json.dump(data, outfile)
+        
+        # Write course_data to a file named <first word of course name>.json
+        file_name = course.name.split()[0][:7] + ".json"
+        with open(file_name, 'w') as json_file:
+            json.dump(course_data, json_file, indent=4)
