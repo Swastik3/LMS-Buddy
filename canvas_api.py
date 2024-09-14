@@ -21,9 +21,21 @@ for course in courses:
     course_data["assignments"] = {}
     assignments = course.get_assignments()
     for assignment in assignments:
+        import requests
+
         assignment_data = {}
         assignment_data["name"] = assignment.name
         assignment_data["due_at"] = assignment.due_at
+        assignment_data["points_possible"] = assignment.points_possible
+
+        # Making a GET request to fetch the score
+        response = requests.get(f"{API_URL}/api/v1/courses/{course.id}/assignments/{assignment.id}/submissions/self", headers={"Authorization": f"Bearer {API_KEY}"})
+        if response.status_code == 200:
+            submission_data = response.json()
+            assignment_data["score"] = submission_data.get("score")
+        else:
+            assignment_data["score"] = None
+
         if assignment.description:
             soup = BeautifulSoup(assignment.description, "html.parser")
             assignment_data["description"] = soup.get_text(separator=' ', strip=True)
