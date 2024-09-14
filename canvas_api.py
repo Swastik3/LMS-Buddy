@@ -45,6 +45,23 @@ for course in courses:
                 assignment_data["description"] = soup.get_text(separator=' ', strip=True)
             else:
                 assignment_data["description"] = None
+
+            # Fetching announcements for the course
+            course_data["announcements"] = {}
+            try:
+                announcements = course.get_discussion_topics(only_announcements=True)
+                for announcement in announcements:
+                    announcement_data = {}
+                    announcement_data["title"] = announcement.title
+                    announcement_data["message"] = BeautifulSoup(announcement.message, "html.parser").get_text(separator=' ', strip=True)
+                    announcement_data["posted_at"] = announcement.posted_at
+                    course_data["announcements"][announcement.id] = announcement_data
+            except Exception as e:
+                if "unauthorized" in str(e).lower():
+                    pass
+                else:
+                    raise e
+
             course_data["assignments"][assignment.id] = assignment_data
 
         course_data["files"] = {}
@@ -61,8 +78,8 @@ for course in courses:
                 pass
             else:
                 raise e
-
-        data["courses"][course.id] = course_data
-
-with open('canvas_data.json', 'w') as outfile:
-    json.dump(data, outfile)
+        
+        # Write course_data to a file named <first word of course name>.json
+        file_name = course.name.split()[0][:7] + ".json"
+        with open(file_name, 'w') as json_file:
+            json.dump(course_data, json_file, indent=4)
