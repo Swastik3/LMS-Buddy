@@ -192,8 +192,8 @@ def get_syllabus_context(state):
 
 def get_canjson_context(state):
     question = state["question"]
-    search_result= canjson.similarity_search(question, k=3)
-    return {"context": str(search_result) +"todo list:" + get_todo()}
+    search_result= canjson.similarity_search(question, k=1)
+    return {"context": "todo list:" + str(get_todo()) + "all_course_info:"+str(search_result) }
 
 def check_answer(state):
     question = state["question"]
@@ -275,5 +275,5 @@ def run_rag_agent(question: str) -> Dict[str, Any]:
     return graph.invoke({"question": question})
 
 if __name__ == "__main__":
-    result = run_rag_agent("can you explain this project https://devpost.com/software/lettuce-ke6nsa")
+    result = run_rag_agent("which assignment  has the most urgency")
     print(result["answer"])
