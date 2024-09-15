@@ -1,1 +1,7 @@
 uagents
+nltk
+canvasapi
+langchain_iris
+python-dotenv
+bs4
+langchain
