@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import './components/Chat.css';
 
 
+
+
 const UploadDocuments: React.FC = () => {
   const [fileName, setFileName] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -44,6 +46,9 @@ const UploadDocuments: React.FC = () => {
         <div className = "upload-alignment">
         <footer className="upload-assistant-input">
           <h2>Upload Your Documents</h2>
+          <div className="upload-icon">
+          <img src={require('./components/upload.png')} />
+          </div>
           <input
             type="file"
             id="pdf-upload"
