@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import './components/Chat.css';
+import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import UploadDocuments from './UploadDocuments';  
 
-const AIHomepage = () => {
+const AIHomepage: React.FC = () => {
+  const navigate = useNavigate();
   const [messages, setMessages] = useState<Array<{ text: string; isUser: boolean }>>([]);
   const [input, setInput] = useState('');
   const [conversations, setConversations] = useState(['Conversation 1', 'Conversation 2', 'Conversation 3']);
@@ -12,26 +15,22 @@ const AIHomepage = () => {
     if (input.trim()) {
       setMessages([...messages, { text: input, isUser: true }]);
       setInput('');
-      //simulated response
+      // simulated response
       setTimeout(() => {
         setMessages(msgs => [...msgs, { text: "How can I help you today?", isUser: false }]);
       }, 1000);
     }
   };
 
-  const handleUpload = () => {
-    // functionality placeholder button
-    console.log('Upload documents');
-  };
-
   return (
-    <div className="ai-assistant-layout">
+    <div className="ai-assistant-layout" id="root">
       <aside className="ai-assistant-sidebar">
         <div className="user-info">
           <img src="https://via.placeholder.com/50" alt="User Avatar" className="user-avatar" />
           <span className="user-name">{currentUser}</span>
         </div>
-        <button className="upload-button" onClick={handleUpload}>Upload Documents</button>
+        <button className="upload-button" onClick={() => navigate('/uploadDocuments')}>Upload Documents</button>
+        
         <div className="conversations-list">
           <h2>Past Conversations</h2>
           <ul>
@@ -68,4 +67,15 @@ const AIHomepage = () => {
   );
 };
 
-export default AIHomepage;
+const AppWrapper: React.FC = () => {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<AIHomepage />} />
+        <Route path="/uploadDocuments" element={<UploadDocuments />} />
+      </Routes>
+    </Router>
+  );
+};
+
+export default AppWrapper;
