@@ -8,3 +8,7 @@ langchain
 PyMuPDF
 Pillow
 google-generativeai
+PyPDF2
+langchain_openai
+modal
+transformers

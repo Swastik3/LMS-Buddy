@@ -25,8 +25,6 @@ from langchain_iris import IRISVector
 embeddings = OpenAIEmbeddings()
 # embeddings = FastEmbedEmbeddings()
 
-
-
 # db.add_documents(docs)
 
 def load_docs(folder_path):

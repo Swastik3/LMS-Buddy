@@ -10,6 +10,14 @@ from dotenv import load_dotenv
 from uagents import Agent, Context, Model, Protocol
 from uagents.setup import fund_agent_if_low
 import time
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import words
+import string
+
+nltk.download('punkt')
+nltk.download('words')
+nltk.download('punkt_tab')
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") # Replace with your actual API key
@@ -64,8 +72,11 @@ def extract_pdf_content(file_path, image_output_dir):
         page = pdf_document[page_num]
         
         # Extract text
-        text_content += page.get_text()
-        print("the page text is ")
+        page_text = page.get_text()
+        cleaned_page_text = clean_text(page_text)
+        text_content += cleaned_page_text + "\n\n" 
+        print("Content extracted from page ", page_num + 1, ": \n", cleaned_page_text)
+
         # Extract images
         image_list = page.get_images(full=True)
         for img_index, img in enumerate(image_list):
@@ -87,6 +98,24 @@ def extract_pdf_content(file_path, image_output_dir):
 def encode_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode('utf-8')
+    
+def clean_text(text):
+    # Tokenize the text
+    tokens = word_tokenize(text)
+    
+    # Load English words
+    english_words = set(words.words())
+    
+    # Remove punctuation
+    tokens = [token.lower() for token in tokens if token not in string.punctuation]
+    
+    # Filter out non-words and very short words
+    cleaned_tokens = [token for token in tokens if token in english_words and len(token) > 1]
+    
+    # Join the cleaned tokens back into a string
+    cleaned_text = ' '.join(cleaned_tokens)
+    
+    return cleaned_text
 
 def perform_ocr_with_gemini(image_path):
     # Encode the image
