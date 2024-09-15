@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import Pinecone as Pine
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_community.llms import Baseten
 
 import argparse
 from typing import List, Dict, Any
@@ -23,12 +24,12 @@ from websearch import extract_url, scrape_website, google_search
 
 load_dotenv()
 os.environ['OPENAI_API_KEY']=os.getenv("OPENAI_API_KEY")
-os.environ['MODEL_ID']=os.getenv("MODEL_ID")
+MODEL_ID=os.getenv("MODEL_ID")
 from langchain_community.llms import Baseten
 
 model1 = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 model2 = ChatOpenAI(model="gpt-4o", temperature=0)
-model3=  Baseten( deployment="production")
+model3=  Baseten( model=MODEL_ID, deployment="production")
 parser = StrOutputParser()
 embeddings = OpenAIEmbeddings()
 username = 'demo'
