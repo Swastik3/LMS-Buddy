@@ -21,7 +21,7 @@ const UploadDocuments: React.FC = () => {
     const formData = new FormData();
     formData.append('pdf', file);
     try {
-      const response = await fetch('http://127.0.0.1:5000/process_pdf', {
+      const response = await fetch('http://127.0.0.1:8000/process_pdf', {
         method: 'POST',
         body: formData,
       });
