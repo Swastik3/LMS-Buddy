@@ -10,6 +10,7 @@ from langchain_openai import ChatOpenAI
 from langchain_community.vectorstores import Pinecone as Pine
 from langchain.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
+from langchain_community.llms import Baseten
 
 import argparse
 from typing import List, Dict, Any
@@ -23,11 +24,12 @@ from websearch import extract_url, scrape_website, google_search
 
 load_dotenv()
 os.environ['OPENAI_API_KEY']=os.getenv("OPENAI_API_KEY")
+MODEL_ID=os.getenv("MODEL_ID")
 from langchain_community.llms import Baseten
 
 model1 = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 model2 = ChatOpenAI(model="gpt-4o", temperature=0)
-model3=  Baseten(model="MODEL_ID", deployment="production")
+model3=  Baseten( model=MODEL_ID, deployment="production")
 parser = StrOutputParser()
 embeddings = OpenAIEmbeddings()
 username = 'demo'
@@ -88,7 +90,8 @@ of the answer, just the relevancy as you do not have any information regarding t
 this is the question:: {question}
 this is my answer:: {context}
 
-If you think the answer is relevant return 1 and if you think the answer is irrelevant return 2
+If you think the answer is relevant return 1 and if you think the answer is irrelevant return 2.
+Be very liberal and only return 2 if the answer completely doesn't make sense and is irrelevant.
 
 NOTE- Only respond with 1 or 2
 
@@ -198,7 +201,7 @@ def get_canjson_context(state):
 def check_answer(state):
     question = state["question"]
     context = state["context"]
-    answer = llm2.invoke(context_check_template.format(context=context, question=question))
+    answer = llm.invoke(context_check_template.format(context=context, question=question))
     answer=answer.content
     print(answer)
     return {"validation_type": int(answer)}
@@ -275,5 +278,5 @@ def run_rag_agent(question: str) -> Dict[str, Any]:
     return graph.invoke({"question": question})
 
 if __name__ == "__main__":
-    result = run_rag_agent("which assignment  has the most urgency")
+    result = run_rag_agent("WHat is the email of my MATH246 professor")
     print(result["answer"])
