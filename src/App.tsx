@@ -2,20 +2,21 @@ import React, { useState, useEffect } from 'react';
 import './components/Chat.css';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import UploadDocuments from './UploadDocuments';
 
-const API_BASE_URL = 'http://localhost:5000';
+// Define the base URL for the backend
+const API_BASE_URL = 'http://localhost:8000';
 
-const UploadDocuments: React.FC = () => {
-  const navigate = useNavigate();
+// Define the structure of a todo item
+interface TodoItem {
+  assignment_name: string;
+  due_date: string;
+}
 
-  return (
-    <div>
-      <h1>Upload Documents</h1>
-      {/* Add file upload functionality here */}
-      <button onClick={() => navigate('/')}>Back to Chat</button>
-    </div>
-  );
-};
+// Define the structure of the todo list
+interface TodoList {
+  [courseName: string]: TodoItem;
+}
 
 const AIHomepage: React.FC = () => {
   const navigate = useNavigate();
@@ -23,34 +24,57 @@ const AIHomepage: React.FC = () => {
   const [input, setInput] = useState('');
   const [conversations, setConversations] = useState(['Conversation 1', 'Conversation 2', 'Conversation 3']);
   const [currentUser, setCurrentUser] = useState('John Doe');
-  const [todoList, setTodoList] = useState<string[]>([]);
+  const [todoList, setTodoList] = useState<TodoList>({});
 
   useEffect(() => {
     fetchTodoList();
+    console.log(messages);
   }, []);
 
   const fetchTodoList = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/todo`);
-      setTodoList(response.data.todo);
+      setTodoList(response.data);
     } catch (error) {
       console.error('Error fetching todo list:', error);
     }
+  };
+
+  const formatTextWithBold = (text: string) => {
+    return text.split(/(\*\*.*?\*\*)/).map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={index}>{part.slice(2, -2)}</strong>;
+      }
+      return part;
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent | null, messageText?: string) => {
     e?.preventDefault();
     const textToSend = messageText || input.trim();
     if (textToSend) {
-      setMessages([...messages, { text: textToSend, isUser: true }]);
+      // Use functional update to ensure state consistency
+      setMessages((prevMessages) => [...prevMessages, { text: textToSend, isUser: true }]);
       setInput('');
 
       try {
         const response = await axios.post(`${API_BASE_URL}/query`, { question: textToSend });
-        setMessages(msgs => [...msgs, { text: response.data.answer, isUser: false }]);
+        // Use functional update here as well
+        console.log(response);
+        setMessages(() => {
+          const newMessages = response.data.map((message: string, index: number) => ({
+            text: message,
+            isUser: index % 2 === 0,
+          }));
+          return [...newMessages];
+        });
+        // setMessages((prevMessages) => [...prevMessages, { text: response.data.answer, isUser: false }]);
       } catch (error) {
         console.error('Error sending message:', error);
-        setMessages(msgs => [...msgs, { text: "Sorry, there was an error processing your request.", isUser: false }]);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { text: 'Sorry, there was an error processing your request.', isUser: false },
+        ]);
       }
     }
   };
@@ -68,7 +92,7 @@ const AIHomepage: React.FC = () => {
           <span className="user-name">{currentUser}</span>
         </div>
         <button className="upload-button" onClick={() => navigate('/uploadDocuments')}>Upload Documents</button>
-        
+
         <div className="conversations-list">
           <h2>Past Conversations</h2>
           <ul>
@@ -77,12 +101,16 @@ const AIHomepage: React.FC = () => {
             ))}
           </ul>
         </div>
-        
+
         <div className="todo-list">
           <h2>To-Do List</h2>
           <ul>
-            {todoList.map((item, index) => (
-              <li key={index}>{item}</li>
+            {Object.entries(todoList).map(([courseName, item]) => (
+              <li key={courseName}>
+                <strong>{courseName}</strong>
+                <p>Assignment: {item.assignment_name}</p>
+                <p>Due: {item.due_date}</p>
+              </li>
             ))}
           </ul>
         </div>
@@ -94,7 +122,7 @@ const AIHomepage: React.FC = () => {
         <main className="ai-assistant-messages">
           {messages.map((message, index) => (
             <div key={index} className={`message ${message.isUser ? 'user-message' : 'ai-message'}`}>
-              {message.text}
+              {formatTextWithBold(message.text)}
             </div>
           ))}
         </main>
@@ -110,9 +138,15 @@ const AIHomepage: React.FC = () => {
           </form>
         </footer>
         <div className="prompt-suggestions">
-          <button className="suggestion-button" onClick={() => handleSuggestionClick('What courses do I have this semester?')}>What courses do I have this semester?</button>            
-          <button className="suggestion-button" onClick={() => handleSuggestionClick('How should I study for my midterm?')}>How should I study for my midterm?</button>
-          <button className="suggestion-button" onClick={() => handleSuggestionClick('When is my next assignment due?')}>When is my next assignment due?</button>
+          <button className="suggestion-button" onClick={() => handleSuggestionClick('What courses do I have this semester?')}>
+            What courses do I have this semester?
+          </button>
+          <button className="suggestion-button" onClick={() => handleSuggestionClick('How should I study for my midterm?')}>
+            How should I study for my midterm?
+          </button>
+          <button className="suggestion-button" onClick={() => handleSuggestionClick('When is my next assignment due?')}>
+            When is my next assignment due?
+          </button>
         </div>
       </div>
     </div>
