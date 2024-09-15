@@ -59,6 +59,11 @@ syllabi = IRISVector(
 llm = model2
 llm2=model1
 
+web_search_prompt="""You are an educational assistant and your job is to answer the question asked by the user based on the information scraped from a website.
+    This is the question: {question}
+    This is the context scraped : {context}
+    
+    """
 context_selection_prompt="""You are an educational assistant and your job is to select the type of context that would best answer an user's question.
 There are three types of context available:
 1) Note and Book based context- This type of context contains information about the actual topics and concepts covered in the course. So any doubt or question that involves study material/ course content would use this
@@ -101,6 +106,17 @@ glaze_prompt="""You are a third personpostive outreach assistant that says reall
      Make sure you try to include how good everyone at the company is and how they are the best.
      
      Remeber you are not part of the company you just appreciate it"""
+
+def web_search(state):
+    question=state["question"]
+    url=extract_url(question)
+    if url:
+        context=scrape_website(url)
+        output = llm.invoke(web_search_prompt.format(question=question, context=context))
+        return {"answer":output, "webState" : 1}
+    else :
+        return{"webState":2}
+    
 
 def sponsor_check(state):
     question = state["question"].lower()
@@ -193,16 +209,11 @@ def generate_answer(state):
     question = state["question"]
     answer = llm.invoke(template.format(context=context, question=question))
     answer=answer.content
-
     print(answer)
-    state["messages"].append(question)
-    state["messages"].append(answer)
     return {"answer": answer}
 
 def dodge_question(state):
     answer = "Sorry, I cannot help you with that question at this time. If you have any other questions, feel free to ask."
-    state["messages"].append(state["question"])
-    state["messages"].append(answer)
     return {"answer": answer}
 
 class GraphState(Dict):
@@ -213,9 +224,10 @@ class GraphState(Dict):
     answer: str
     sponsor_name: str
     sponsor_type: int
-    messages: List[str]
+    webState: int
 workflow = StateGraph(GraphState)
 
+workflow.add_node("web_search", web_search)
 workflow.add_node("sponsor_check", sponsor_check)
 workflow.add_node("sponsor_rep", sponsor_rep)
 workflow.add_node("select_context", select_context)
@@ -226,8 +238,8 @@ workflow.add_node("check_answer", check_answer )
 workflow.add_node("generate_answer", generate_answer)
 workflow.add_node("dodge_question", dodge_question)
 
-
-workflow.add_edge(START, "sponsor_check")
+workflow.add_edge(START, "web_search")
+workflow.add_conditional_edges("web_search", lambda x: x["webState"], {1: END, 2: "sponsor_check"})
 workflow.add_conditional_edges(
     "sponsor_check",
     lambda x: x["sponsor_type"],
@@ -262,5 +274,6 @@ graph = workflow.compile()
 def run_rag_agent(question: str) -> Dict[str, Any]:
     return graph.invoke({"question": question})
 
-result = run_rag_agent("I hate intersystems")
-print(result["answer"])
+if __name__ == "__main__":
+    result = run_rag_agent("can you explain this project https://devpost.com/software/lettuce-ke6nsa")
+    print(result["answer"])
