@@ -86,6 +86,7 @@ body {
 .conversations-list {
   flex-grow: 1;
   overflow-y: auto;
+  border-top: 1px solid var(--ai-assistant-text);
 }
 
 .conversations-list h2 {
@@ -135,10 +136,11 @@ body {
   padding-inline: 50px;
   align-items:center;
   justify-content: center;
-  border: 2px dashed var(--ai-assistant-border);
+  border: 3px dashed var(--ai-assistant-primary);
   background-color: var(--ai-assistant-ai-msg);
   text-align: center; 
-  padding-bottom: 1.75em;
+  padding-bottom: 2em;
+  padding-top: 1.75em;
   width: 100vh;
 }
 
@@ -268,4 +270,55 @@ img{
 .upload-icon{
   align-content: center;
   justify-content: center;
+}
+
+
+.file-upload-input {
+  display: none;
+}
+
+.file-upload-label {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: var(--ai-assistant-primary);
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.file-upload-label:hover {
+  background-color: var(--ai-assistant-primary-hover);
+}
+
+.upload-success {
+  color: #4caf50;
+  margin-top: 10px;
+}
+
+.upload-error {
+  color: #f44336;
+  margin-top: 10px;
+}
+
+.upload-icon {
+  margin-bottom: 20px;
+}
+
+.user-info{
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  justify-content: flex-start;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--ai-assistant-text);
+}
+
+.user-name{
+  padding-left: 15px;
+
+}
+
+.todo-list{
+  border-top: 1px solid var(--ai-assistant-text);
 }

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './components/Chat.css';
+import { Upload } from 'lucide-react';
+import { UserCircle } from 'lucide-react';
 
 const UploadDocuments: React.FC = () => {
   const [fileName, setFileName] = useState<string | null>(null);
@@ -45,7 +47,7 @@ const UploadDocuments: React.FC = () => {
     <div className="ai-assistant-layout" id="root">
       <aside className="ai-assistant-sidebar">
         <div className="user-info">
-          <img src="https://via.placeholder.com/50" alt="User Avatar" className="user-avatar" />
+        <UserCircle />
           <span className="user-name">{currentUser}</span>
         </div>
         <button className="chat-button" onClick={() => navigate('/')}>Go to App</button>
@@ -67,7 +69,7 @@ const UploadDocuments: React.FC = () => {
           <div className="upload-assistant-input">
             <h2>Upload Your Documents</h2>
             <div className="upload-icon">
-              <img src={require('./components/upload.png')} alt="Upload icon" />
+              <Upload size={64} color="var(--ai-assistant-text)" />
             </div>
             <input
               type="file"

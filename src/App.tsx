@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import axios from 'axios';
 import UploadDocuments from './UploadDocuments';
 import { text } from 'stream/consumers';
+import { UserCircle } from 'lucide-react';
 
 // Define the base URL for the backend
 const API_BASE_URL = 'http://localhost:8000';
@@ -107,7 +108,7 @@ const AIHomepage: React.FC = () => {
     <div className="ai-assistant-layout" id="root">
       <aside className="ai-assistant-sidebar">
         <div className="user-info">
-          <img src="https://via.placeholder.com/50" alt="User Avatar" className="user-avatar" />
+          <UserCircle />
           <span className="user-name">{currentUser}</span>
         </div>
         <button className="upload-button" onClick={() => navigate('/uploadDocuments')}>Upload Documents</button>
