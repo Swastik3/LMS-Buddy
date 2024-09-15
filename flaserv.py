@@ -159,11 +159,12 @@ async def edit_email():
     course_number = request_data['course_number']
     prompt = request_data['prompt']
     draft = request_data['draft']
+    subject = request_data['subject']
 
     print(f"Draft: {draft}")
     print(f"Prompt: {prompt}")
 
-    response = await query(destination = EMAIL_AGENT_ADDRESS, message = EditRequest(prompt = prompt, content = draft, course_number = course_number, recipient_email = email),timeout = 15.0)
+    response = await query(destination = EMAIL_AGENT_ADDRESS, message = EditRequest(prompt = prompt, content = draft, recipient_email = email, subject = subject),timeout = 15.0)
 
     if response.status == "delivered":
         temp_json_path = "temp_email_data.json"
@@ -171,7 +172,9 @@ async def edit_email():
             with open(temp_json_path, 'r') as temp_json_file:
                 data = json.load(temp_json_file)
             os.remove(temp_json_path)
-            return jsonify(data)
+            response = query(destination = EMAIL_AGENT_ADDRESS, message = EmailConfirmation(content= data["content"], recipient_email=email, subject=data["subject"]),timeout = 15.0)
+            if response.status == "delivered":
+                return jsonify({"status": "Email sent successfully", "data":data})
         except Exception as e:
             return jsonify({"error": str(e)})
 
