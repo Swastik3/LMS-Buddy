@@ -40,7 +40,7 @@ from langchain_iris import IRISVector
 embeddings = OpenAIEmbeddings()
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
+CORS(app)
 
 messages = []
 
@@ -106,15 +106,14 @@ async def draft_email():
 
 @app.route("/process_pdf", methods=["POST"])
 async def process_pdf():
-    request_data = request.get_json()
+    
     pdf = request.files['pdf']
     #save the pdf to a specific path
     pdf_path = "temp.pdf"
     pdf.save(pdf_path)
 
     pdf_path = "temp.pdf"
-    img_path = request_data['img']
-
+    img_path = "sample_imgs/"
     print(f"PDF Path: {pdf_path}")
     print(f"Image Path: {img_path}")
 
