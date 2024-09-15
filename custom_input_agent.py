@@ -15,6 +15,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import words
 import string
+import json
 
 nltk.download('punkt')
 nltk.download('words')
@@ -69,6 +70,18 @@ async def handle_custom_input(ctx: Context, sender: str, msg: PDFProcessRequest)
         text_content, num_images = extract_pdf_content(pdf_path, image_dir)
         ocr_results = process_images_with_ocr(image_dir)
         ctx.logger.info(f"OCR results from PDF: {ocr_results}")
+        temp_json_data = {
+            "pdf_path": pdf_path,
+            "image_dir": image_dir,
+            "text_content": text_content,
+            "num_images": num_images,
+            "ocr_results": ocr_results
+        }
+
+        temp_json_path = "temp_data.json"
+        with open(temp_json_path, 'w') as temp_json_file:
+            json.dump(temp_json_data, temp_json_file, indent=4)
+
         await ctx.send(sender, PDFInputResponse(text_content=text_content, num_images=num_images, ocr_results=ocr_results))
         # await ctx.send(sender, TestResponse(response="PDF processed successfully"))
     # await ctx.send(sender, CustomInputResponse(text_content=text_content, num_images=num_images, ocr_results=ocr_results))

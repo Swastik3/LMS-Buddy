@@ -83,9 +83,9 @@ def send_email(to, subject, body):
         return None
 
 # Define the agent
-email_agent = Agent(name="email_curator", seed="your_unique_seed_here", endpoint=["http://localhost:8002/submxit"], port=8002)
-user_agent = Agent(name = "user_agent", seed = "user_agent_seed", endpoint = "http://localhost:8003", port = 8003)
+email_agent = Agent(name="email_curator", seed="your_unique_seed_here", endpoint=["http://localhost:8002/submit"], port=8002)
 fund_agent_if_low(email_agent.wallet.address())
+print(email_agent.address)
 # Define the request models
 
 #don't even need this
@@ -119,46 +119,60 @@ async def handle_email_request(ctx: Context, sender: str, msg: EmailRequest):
     subject = f"Course Information: {msg.course_number}"
     response = EmailDraftResponse(
         status="draft_ready",
-        draft_content=email_content,
+        draft_content=email_content["content"],
         recipient_email=msg.recipient_email,
         subject=subject
     )
 
-    return response
+    temp_json_data = {
+        "prompt": msg.prompt,
+        "course_number": msg.course_number,
+        "email_content": email_content["content"],
+        "recipient_email": msg.recipient_email,
+        "subject": subject
+    }
 
-@email_agent.on_query(model=EditRequest, replies={EmailDraftResponse})
-async def handle_edit_request(ctx: Context, msg: EditRequest):
-    ctx.logger.info(f"Received email request: {msg}")
-
-    # Generate email content using OpenAI
-    output = edit_email_content(msg.prompt, msg.existing_draft.draft_content)
-    email_content = output['content']
-    subject = output['subject']
-
-    # Prepare and send draft response
-    response = EmailDraftResponse(
-        status="draft_ready",
-        draft_content=email_content,
-        recipient_email=msg.recipient_email,
-        subject=subject
-    )
-    print(response.json)
-    return response
-
-@email_agent.on_query(model=EmailConfirmation, replies={EmailSentResponse})
-async def handle_email_confirmation(ctx: Context, sender: str, msg: EmailConfirmation):
-    ctx.logger.info(f"Received email confirmation: {msg}")
-    # Send email using Gmail API
-    content_to_send = msg.content if msg.content else msg.draft_content
-    send_status = send_email(msg.recipient_email, msg.subject, content_to_send)
-
-    # Prepare and send response
-    response = EmailSentResponse(
-        status="success" if send_status else "failure",
-        message="Email sent successfully" if send_status else "Failed to send email"
-    )
-
+    temp_json_path = "temp_email_data.json"
+    with open(temp_json_path, 'w') as temp_json_file:
+        json.dump(temp_json_data, temp_json_file, indent=4)
+        
     await ctx.send(sender, response)
+
+# @email_agent.on_query(model=EditRequest, replies={EmailDraftResponse})
+# async def handle_edit_request(ctx: Context, sender : str, msg: EditRequest):
+#     ctx.logger.info(f"Received email request: {msg}")
+
+#     # Generate email content using OpenAI
+#     output = edit_email_content(msg.prompt, msg.existing_draft.draft_content)
+#     email_content = output['content']
+#     subject = output['subject']
+
+#     # Prepare and send draft response
+#     response = EmailDraftResponse(
+#         status="draft_ready",
+#         draft_content=email_content,
+#         recipient_email=msg.recipient_email,
+#         subject=subject
+#     )
+
+#     print("hello")
+    
+#     await ctx.send(sender, response)
+
+# @email_agent.on_query(model=EmailConfirmation, replies={EmailSentResponse})
+# async def handle_email_confirmation(ctx: Context, sender: str, msg: EmailConfirmation):
+#     ctx.logger.info(f"Received email confirmation: {msg}")
+#     # Send email using Gmail API
+#     content_to_send = msg.content if msg.content else msg.draft_content
+#     send_status = send_email(msg.recipient_email, msg.subject, content_to_send)
+
+#     # Prepare and send response
+#     response = EmailSentResponse(
+#         status="success" if send_status else "failure",
+#         message="Email sent successfully" if send_status else "Failed to send email"
+#     )
+
+#     await ctx.send(sender, response)
 
 def generate_email_content(prompt: str, course_number: str) -> str:
     try:
@@ -195,9 +209,5 @@ def edit_email_content(draft: str, prompt: str) -> str:
         print(f"Error generating email content: {e}")
         return f"Unable to generate edit content for."
 
-bureau = Bureau()
-bureau.add(email_agent)
-bureau.add(user_agent)
-
 if __name__ == "__main__":
-    bureau.run()
+    email_agent.run()
