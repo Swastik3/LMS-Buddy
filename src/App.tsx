@@ -3,6 +3,7 @@ import './components/Chat.css';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import UploadDocuments from './UploadDocuments';
+import { text } from 'stream/consumers';
 
 // Define the base URL for the backend
 const API_BASE_URL = 'http://localhost:8000';
@@ -73,6 +74,9 @@ const AIHomepage: React.FC = () => {
       setInput('');
 
       try {
+        if (textToSend.includes('email')) {
+          const response = await axios.post(`${API_BASE_URL}/draft_email`, { email: "swastik3@terpmail.umd.ed", prompt: textToSend, course_number: textToSend.match(/[A-Z]{4}\d{3}/)?.[0] });
+        }
         const response = await axios.post(`${API_BASE_URL}/query`, { question: textToSend });
         // Use functional update here as well
         console.log(response);
