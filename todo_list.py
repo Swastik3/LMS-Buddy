@@ -22,7 +22,7 @@ def get_todo():
         for item in course.get_todo_items():
             out[course.name]["assignment_name"]=item.assignment["name"]
             due_date = datetime.strptime(item.assignment["due_at"], "%Y-%m-%dT%H:%M:%SZ")
-            out[course.name]["due date"]=due_date.strftime("%B %d, %Y %I:%M %p")
+            out[course.name]["due_date"]=due_date.strftime("%B %d, %Y %I:%M %p")
   return out
 
 # print(get_todo())

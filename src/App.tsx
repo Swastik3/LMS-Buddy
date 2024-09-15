@@ -30,12 +30,25 @@ const AIHomepage: React.FC = () => {
 
   useEffect(() => {
     fetchTodoList();
-    console.log(messages);
+    retrieveMessagesFromCache();
   }, []);
 
+  useEffect(() => {
+    // Save messages to local storage whenever they change
+    localStorage.setItem('cachedMessages', JSON.stringify(messages));
+  }, [messages]);
+
+  const retrieveMessagesFromCache = () => {
+    const cachedMessages = localStorage.getItem('cachedMessages');
+    if (cachedMessages) {
+      setMessages(JSON.parse(cachedMessages));
+    }
+  };
   const fetchTodoList = async () => {
     try {
+      console.log('Fetching todo list...');
       const response = await axios.get(`${API_BASE_URL}/todo`);
+      console.log('Todo list:', response.data);
       setTodoList(response.data);
     } catch (error) {
       console.error('Error fetching todo list:', error);
@@ -107,13 +120,16 @@ const AIHomepage: React.FC = () => {
         <div className="todo-list">
           <h2>To-Do List</h2>
           <ul>
-            {Object.entries(todoList).map(([courseName, item]) => (
-              <li key={courseName}>
-                <strong>{courseName}</strong>
-                <p>Assignment: {item.assignment_name}</p>
-                <p>Due: {item.due_date}</p>
-              </li>
-            ))}
+            {Object.entries(todoList)
+  .filter(([_, item]) => item.assignment_name && item.due_date)
+  .map(([courseName, item]) => (
+    <li key={courseName}>
+      <strong>{courseName}</strong>
+      <p>Assignment: {item.assignment_name}</p>
+      <p>Due: {item.due_date}</p>
+    </li>
+  ))
+}
           </ul>
         </div>
       </aside>
