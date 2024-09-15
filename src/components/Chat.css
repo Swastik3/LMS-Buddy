@@ -136,8 +136,22 @@ body {
   align-items:center;
   justify-content: center;
   border: 2px dashed var(--ai-assistant-border);
+  background-color: var(--ai-assistant-ai-msg);
   text-align: center; 
   padding-bottom: 1.75em;
+  width: 100vh;
+}
+
+.input{
+  background-color: var(--ai-assistant-primary);
+  color: white;
+  border: none;
+  padding: 0.75rem 1rem;
+  border-radius: 0.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: 1rem;
 }
 
 .upload-alignment{
@@ -240,8 +254,18 @@ body {
   border-radius: 0.25rem;
   font-size: 1rem;
   cursor: pointer;
+
   transition: background-color 0.2s;
   margin-bottom: 1rem;
   text-wrap: wrap;
 }
 
+img{
+  height: 40%;
+  width: auto;
+}
+
+.upload-icon{
+  align-content: center;
+  justify-content: center;
+}
