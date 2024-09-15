@@ -17,7 +17,6 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_iris import IRISVector
 
-
 # loader =PyPDFLoader("syallabi\MATH246.pdf")
 # # documents= loader.load()
 # # text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=20)
@@ -25,8 +24,6 @@ from langchain_iris import IRISVector
 
 embeddings = OpenAIEmbeddings()
 # embeddings = FastEmbedEmbeddings()
-
-
 
 # db.add_documents(docs)
 
