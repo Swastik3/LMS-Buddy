@@ -8,12 +8,41 @@ import json
 from gmail_agent import EmailRequest
 import os
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
+
+from langchain.text_splitter import CharacterTextSplitter
+
+from langchain_community.document_loaders import JSONLoader
+import json
+from pathlib import Path
+from pprint import pprint
+from langchain_openai import OpenAIEmbeddings
+
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_iris import IRISVector
+
+# loader =PyPDFLoader("syallabi\MATH246.pdf")
+# # documents= loader.load()
+# # text_splitter = CharacterTextSplitter(chunk_size=400, chunk_overlap=20)
+# docs = text_splitter.split_documents(documents)
+
+embeddings = OpenAIEmbeddings()
 app = Flask(__name__)
 
 # Define the address of your agent
 AGENT_ADDRESS = "agent1qd9m7gwn5ankrvlvdqkxyf6mnsxd6yvhf3xgrj97gv0fjjavj263qt890sm"
 EMAIL_AGENT_ADDRESS = "agent1qv9hk62657mx0429je92hltn48vrq3uwdghd20a9l69pzqclp7qhkc6hf8n"
-
+username = 'demo'
+password = 'demo' 
+hostname = os.getenv('IRIS_HOSTNAME', 'localhost')
+port = '1972' 
+namespace = 'USER'
+CONNECTION_STRING = f"iris://{username}:{password}@{hostname}:{port}/{namespace}"    
 # Define data model for incoming requests
 class PDFProcessRequest(Model):
     pdf_path: str
@@ -64,7 +93,27 @@ async def process_pdf():
             with open(temp_json_path, 'r') as temp_json_file:
                 data = json.load(temp_json_file)
             os.remove(temp_json_path)
-            return jsonify(data)
+            x = jsonify(data)
+           
+            documents= x["ocr_results"]+" "+x["text_content"]
+            text_splitter = CharacterTextSplitter(chunk_size=200, chunk_overlap=50)
+            data= text_splitter.split_documents(documents)
+            
+            # db = IRISVector.from_documents(
+            # embedding=embeddings,
+            # documents=data,
+            # collection_name=COLLECTION_NAME,
+            # connection_string=CONNECTION_STRING,
+            # )
+            db = IRISVector(
+            embedding_function=embeddings,
+            dimension=1536,
+            collection_name="notes",
+            connection_string=CONNECTION_STRING,
+            )
+            db.add_documents(data)
+            print("done")
+            return x
         except Exception as e:
             return jsonify({"error": str(e)})
 
