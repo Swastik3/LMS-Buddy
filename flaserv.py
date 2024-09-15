@@ -107,7 +107,12 @@ async def draft_email():
 @app.route("/process_pdf", methods=["POST"])
 async def process_pdf():
     request_data = request.get_json()
-    pdf_path = request_data['pdf']
+    pdf = request.files['pdf']
+    #save the pdf to a specific path
+    pdf_path = "temp.pdf"
+    pdf.save(pdf_path)
+
+    pdf_path = "temp.pdf"
     img_path = request_data['img']
 
     print(f"PDF Path: {pdf_path}")
