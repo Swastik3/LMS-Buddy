@@ -15,6 +15,7 @@ import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import words
 import string
+import json 
 
 nltk.download('punkt')
 nltk.download('words')
@@ -41,6 +42,7 @@ async def start_input_agent(ctx: Context):
 class PDFProcessRequest(Model):
     pdf_path: str
     image_dir: str
+    json_name: str
 
 
 class PDFInputResponse(Model):
@@ -66,6 +68,7 @@ async def handle_custom_input(ctx: Context, sender: str, msg: PDFProcessRequest)
         ctx.logger.info(msg.image_dir)
         pdf_path = msg.pdf_path
         image_dir = msg.image_dir
+        json_file_name = msg.json_name
         text_content, num_images = extract_pdf_content(pdf_path, image_dir)
         ocr_results = process_images_with_ocr(image_dir)
         ctx.logger.info(f"OCR results from PDF: {ocr_results}")
