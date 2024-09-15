@@ -5,7 +5,7 @@ import './components/Chat.css';
 
 const UploadDocuments: React.FC = () => {
   const [fileName, setFileName] = useState<string | null>(null);
-  const navigate = useNavigate(); // Navigate to different pages
+  const navigate = useNavigate();
   const [conversations] = useState(['Conversation 1', 'Conversation 2', 'Conversation 3']);
   const [currentUser] = useState('John Doe');
 
@@ -17,8 +17,6 @@ const UploadDocuments: React.FC = () => {
 
     const formData = new FormData();
     formData.append('file', file);
-
-    // Handle actual upload logic (can be added later)
   };
 
   return (

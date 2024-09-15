@@ -10,8 +10,9 @@ const AIHomepage: React.FC = () => {
   const [conversations, setConversations] = useState(['Conversation 1', 'Conversation 2', 'Conversation 3']);
   const [currentUser, setCurrentUser] = useState('John Doe');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = (e: React.FormEvent | null, messageText?: string) => {
+    e?.preventDefault();
+    const textToSend = messageText || input.trim();
     if (input.trim()) {
       setMessages([...messages, { text: input, isUser: true }]);
       setInput('');
@@ -20,6 +21,11 @@ const AIHomepage: React.FC = () => {
         setMessages(msgs => [...msgs, { text: "How can I help you today?", isUser: false }]);
       }, 1000);
     }
+  };
+
+  const handleSuggestionClick = (suggestion: string) => {
+    setInput(suggestion);
+    handleSubmit(null, suggestion);
   };
 
   return (
@@ -62,6 +68,11 @@ const AIHomepage: React.FC = () => {
             <button type="submit">Send</button>
           </form>
         </footer>
+        <div className="prompt-suggestions">
+          <button className="suggestion-button" onClick={() => handleSuggestionClick('What courses do I have this semester?')}>What courses do I have this semester?</button>            
+          <button className="suggestion-button" onClick={() => {setInput('What courses do I have this semester?'); handleSubmit(new Event('submit') as unknown as React.FormEvent); }}>How should I study for my midterm?</button>
+          <button className="suggestion-button" onClick={() => {setInput('What courses do I have this semester?'); handleSubmit(new Event('submit') as unknown as React.FormEvent); }}>When is my next assignment due?</button>
+        </div>
       </div>
     </div>
   );
