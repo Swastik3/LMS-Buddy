@@ -1,0 +1,70 @@
+{
+    "name": "CMSC320-0201/DATA320-0201:  Introduction to Data Science-Fall 2024 fardina/",
+    "assignments": {
+        "6938822": {
+            "name": "HW 1 - Pandas and SQL Section",
+            "due_at": "2024-09-20T03:59:59Z",
+            "points_possible": 70.0,
+            "score": null,
+            "description": "Welcome to the first homework of this semester. Follow the directions carefully! \ud83d\udd25 The section and its instructions are linked here Overview: This section (Pandas AND SQL) \u00a0is worth 70 point s, contributing to a total of 100 points for the entire homework. There are 3 Parts to complete in this section. (DON\u2019T REMOVE ANY PART OF THE QUESTIONS) : Part 1: 25 points Part 2: 30 points Part 3: 15 points Note: ~ Start early, as this is a bit of a lengthy homework (YOU GOT THIS!) ~ Submission: Submit your completed notebook (.ipynb) file to the \"HW1- Pandas and SQL Section\" on Gradescope . Late Submission Policy: A 24-hour late submission is allowed with a 15% penalty ."
+        },
+        "6938825": {
+            "name": "HW 1 - Git Section",
+            "due_at": "2024-09-20T03:59:59Z",
+            "points_possible": 30.0,
+            "score": null,
+            "description": "Welcome to the first homework of this semester. Follow the directions carefully! \ud83d\udd25 The section and its instructions are linked here Overview: This section (Git) \u00a0is worth 3 0 point s, contributing to a total of 100 points for the entire homework. Carefully follow the directions in this section to make sure you complete all the tasks successfully. Note: ~ Start early, as this is a bit of a lengthy homework (YOU GOT THIS!) ~ Submission: Submit ONLY the URL link of your completed repository to the\u00a0 \"HW1- Git Section\" on Gradescope . Late Submission Policy: A 24-hour late submission is allowed with a 15% penalty ."
+        },
+        "6936993": {
+            "name": "BONUS Quiz: Course Logistics Introduction ",
+            "due_at": "2024-09-07T03:59:00Z",
+            "points_possible": 5.0,
+            "score": 4.5,
+            "description": "This is a bonus quiz! This quiz consists of 13 questions including MCQ, Fill in the blanks, T/F. The questions are related to course logistics . The students can find the answers from Syllabus (https://cmsc320.github.io/) and Lecture 01. Do not forget to read the course website (https://cmsc320.github.io/), and syllabus along with the slide before taking this quiz. The total time duration is 12 minutes . Each multiple-choice question has only one correct answer . Note that there are no questions from \"Overview of Data Science\" in this quiz . Please manage your time effectively, as multiple attempts are not allowed . Due date: September 06, 2024."
+        },
+        "6927330": {
+            "name": "Final Project - Checkpoint 1",
+            "due_at": "2024-09-25T03:59:59Z",
+            "points_possible": 5.0,
+            "score": null,
+            "description": "Final Project Assignment.pdf Checkpoint 1 of the final project is due on Thursday, 9/24 on Gradescope. Don't forget to add your group on there when you submit! Also, write down all group members name and their UID in the PDF that you will submit."
+        },
+        "6927331": {
+            "name": "Final Project - Checkpoint 2",
+            "due_at": "2024-10-23T03:59:59Z",
+            "points_possible": 25.0,
+            "score": null,
+            "description": "Final Project Assignment-1.pdf Checkpoint 2 of the final project is due on Tuesday, October 22 on Gradescope. Remember to include everyone in your group in the submission."
+        },
+        "6927332": {
+            "name": "Final Project Checkpoint 03",
+            "due_at": "2024-12-04T04:59:59Z",
+            "points_possible": 70.0,
+            "score": null,
+            "description": "Final Project Assignment-2.pdf This is a reminder assignment, submit ONLY on gradescope. This is for your ELMS timeline. Again , you do NOT need to submit anything here."
+        }
+    },
+    "announcements": {
+        "5480306": {
+            "title": "Friday 1PM Office Hour Cancellation",
+            "message": "Dear Students, Due to a conflict with my work hours, all Friday 1PM-2PM Zoom office hours are canceled. I apologize for any inconvenience. Please reach out to me via Thursday office hours or at Piazza. I appreciate your understanding. Best regards, Shengjie",
+            "posted_at": "2024-09-12T17:29:22Z"
+        },
+        "5473499": {
+            "title": "About ADS Accommodation",
+            "message": "Dear Students, For those who have requested ADS accommodations, I have already accepted your requests. I have also provided 1.5x time for the bonus quiz. Thank you, Your Professor",
+            "posted_at": "2024-09-06T22:06:48Z"
+        },
+        "5467571": {
+            "title": "A Bonus quiz has been posted on Course Logistics.",
+            "message": "Dear Students, Feel free to take the quiz if you want to earn some bonus points. Please refer to the course website: https://cmsc320.github.io/ and review Slide 01, specifically the \"Course Intro Logistics\" part, to complete the quiz.",
+            "posted_at": "2024-09-01T06:34:24Z"
+        },
+        "5467537": {
+            "title": "About Course Logistic and Communication",
+            "message": "Dear Students, To help with logistics-related requests, such as extensions or grading issues, please use the . Submitting this form will ensure a quicker response. If you do not receive a response within 48 hours, email cmsc320gradingissues.dr.fardina@gmail.com . Include relevant tags at the beginning of your email subject line, such as [hw_extension/req], [project_extension/req], [gradeissue], etc. If you have a request that does not fit into one of these categories, then email me at fardina@umd.edu with [CMSC320] in the subject line. For assignment or project-related issues, please utilize the TA's office hours and the Piazza platform. I will be adding more TA office hours soon. Enjoy your weekend! Your Professor",
+            "posted_at": "2024-08-31T23:44:56Z"
+        }
+    },
+    "files": {}
+}
