@@ -5,3 +5,6 @@ langchain_iris
 python-dotenv
 bs4
 langchain
+PyMuPDF
+Pillow
+google-generativeai
