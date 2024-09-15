@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './components/Chat.css';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import UploadDocuments from './UploadDocuments';
-import { text } from 'stream/consumers';
 
 // Define the base URL for the backend
 const API_BASE_URL = 'http://localhost:8000';
@@ -26,8 +25,9 @@ const AIHomepage: React.FC = () => {
   const [conversations, setConversations] = useState(['Conversation 1', 'Conversation 2', 'Conversation 3']);
   const [currentUser, setCurrentUser] = useState('John Doe');
   const [todoList, setTodoList] = useState<TodoList>({});
-
-
+  const [isEmailMode, setIsEmailMode] = useState(false);
+  const [emailDraft, setEmailDraft] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
 
   useEffect(() => {
     fetchTodoList();
@@ -35,7 +35,6 @@ const AIHomepage: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Save messages to local storage whenever they change
     localStorage.setItem('cachedMessages', JSON.stringify(messages));
   }, [messages]);
 
@@ -45,6 +44,7 @@ const AIHomepage: React.FC = () => {
       setMessages(JSON.parse(cachedMessages));
     }
   };
+
   const fetchTodoList = async () => {
     try {
       console.log('Fetching todo list...');
@@ -65,38 +65,57 @@ const AIHomepage: React.FC = () => {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent | null, messageText?: string) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent | null, messageText?: string) => {
     e?.preventDefault();
     const textToSend = messageText || input.trim();
     if (textToSend) {
-      // Use functional update to ensure state consistency
       setMessages((prevMessages) => [...prevMessages, { text: textToSend, isUser: true }]);
       setInput('');
 
       try {
-        if (textToSend.includes('email')) {
-          const response = await axios.post(`${API_BASE_URL}/draft_email`, { email: "swastik3@terpmail.umd.ed", prompt: textToSend, course_number: textToSend.match(/[A-Z]{4}\d{3}/)?.[0] });
+        if (!isEmailMode && textToSend.toLowerCase().includes('email')) {
+          setIsEmailMode(true);
+          const response = await axios.post(`${API_BASE_URL}/draft_email`, { 
+            email_to: "swastik3@terpmail.umd.ed", 
+            prompt: textToSend, 
+            course_number: textToSend.match(/[A-Z]{4}\d{3}/)?.[0] 
+          });
+          setEmailDraft(response.data.draft);
+          setEmailSubject(response.data.subject);
+          setMessages((prevMessages) => [...prevMessages, { text: `Email draft created. Would you like to send, edit, or cancel?`, isUser: false }]);
+        } else if (isEmailMode) {
+          const lowerInput = textToSend.toLowerCase();
+          if (lowerInput.includes('yes') || lowerInput.includes('send')) {
+            await axios.post(`${API_BASE_URL}/send_email`, { draft: emailDraft, subject : emailSubject, email_to: "swastik3@terpmail.umd.edu"});
+            setIsEmailMode(false);
+            setMessages((prevMessages) => [...prevMessages, { text: 'Email sent successfully.', isUser: false }]);
+          } else if (lowerInput.includes('no') || lowerInput.includes('cancel')) {
+            setIsEmailMode(false);
+            setMessages((prevMessages) => [...prevMessages, { text: 'Email draft discarded.', isUser: false }]);
+          } else if (lowerInput.includes('edit')) {
+            const response = await axios.post(`${API_BASE_URL}/edit_email`, { draft: emailDraft, prompt: lowerInput, email_to: "swastik3@terpmail.umd.edu", subject: emailSubject });
+            setEmailDraft(response.data.updatedDraft);
+            setMessages((prevMessages) => [...prevMessages, { text: `Email draft updated. Would you like to send, edit again, or cancel?`, isUser: false }]);
+          }
+        } else {
+          const response = await axios.post(`${API_BASE_URL}/query`, { question: textToSend });
+          setMessages(() => {
+            const newMessages = response.data.map((message: string, index: number) => ({
+              text: message,
+              isUser: index % 2 === 0,
+            }));
+            return [...newMessages];
+          });
         }
-        const response = await axios.post(`${API_BASE_URL}/query`, { question: textToSend });
-        // Use functional update here as well
-        console.log(response);
-        setMessages(() => {
-          const newMessages = response.data.map((message: string, index: number) => ({
-            text: message,
-            isUser: index % 2 === 0,
-          }));
-          return [...newMessages];
-        });
-        // setMessages((prevMessages) => [...prevMessages, { text: response.data.answer, isUser: false }]);
       } catch (error) {
-        console.error('Error sending message:', error);
+        console.error('Error processing request:', error);
         setMessages((prevMessages) => [
           ...prevMessages,
           { text: 'Sorry, there was an error processing your request.', isUser: false },
         ]);
       }
     }
-  };
+  }, [input, isEmailMode, emailDraft]);
 
   const handleSuggestionClick = (suggestion: string) => {
     setInput(suggestion);
@@ -125,21 +144,22 @@ const AIHomepage: React.FC = () => {
           <h2>To-Do List</h2>
           <ul>
             {Object.entries(todoList)
-  .filter(([_, item]) => item.assignment_name && item.due_date)
-  .map(([courseName, item]) => (
-    <li key={courseName}>
-      <strong>{courseName}</strong>
-      <p>Assignment: {item.assignment_name}</p>
-      <p>Due: {item.due_date}</p>
-    </li>
-  ))
-}
+              .filter(([_, item]) => item.assignment_name && item.due_date)
+              .map(([courseName, item]) => (
+                <li key={courseName}>
+                  <strong>{courseName}</strong>
+                  <p>Assignment: {item.assignment_name}</p>
+                  <p>Due: {item.due_date}</p>
+                </li>
+              ))
+            }
           </ul>
         </div>
       </aside>
       <div className="ai-assistant-container">
         <header className="ai-assistant-header">
           <h1>AI Assistant Interface</h1>
+          {isEmailMode && <div className="email-mode-indicator">Email Mode Active</div>}
         </header>
         <main className="ai-assistant-messages">
           {messages.map((message, index) => (
@@ -154,22 +174,24 @@ const AIHomepage: React.FC = () => {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message here..."
+              placeholder={isEmailMode ? "Type 'send', 'edit', or 'cancel'" : "Type your message here..."}
             />
             <button type="submit">Send</button>
           </form>
         </footer>
-        <div className="prompt-suggestions">
-          <button className="suggestion-button" onClick={() => handleSuggestionClick('What courses do I have this semester?')}>
-            What courses do I have this semester?
-          </button>
-          <button className="suggestion-button" onClick={() => handleSuggestionClick('How should I study for my midterm?')}>
-            How should I study for my midterm?
-          </button>
-          <button className="suggestion-button" onClick={() => handleSuggestionClick('When is my next assignment due?')}>
-            When is my next assignment due?
-          </button>
-        </div>
+        {!isEmailMode && (
+          <div className="prompt-suggestions">
+            <button className="suggestion-button" onClick={() => handleSuggestionClick('What courses do I have this semester?')}>
+              What courses do I have this semester?
+            </button>
+            <button className="suggestion-button" onClick={() => handleSuggestionClick('How should I study for my midterm?')}>
+              How should I study for my midterm?
+            </button>
+            <button className="suggestion-button" onClick={() => handleSuggestionClick('When is my next assignment due?')}>
+              When is my next assignment due?
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
