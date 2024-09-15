@@ -13,3 +13,5 @@ langchain_openai
 modal
 transformers
 torch
+flask
+quart

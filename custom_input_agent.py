@@ -27,7 +27,7 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 BASE_URL = "http://localhost:8001"
 
-input_agent = Agent(name="custom_input_handler", seed="custom_input_handler_seed", endpoint="http://localhost:8001", port=8001)
+input_agent = Agent(name="custom_input_handler", seed="custom_input_handler_seed", endpoint="http://127.0.0.1:8001", port=8001)
 fund_agent_if_low(input_agent.wallet.address())
 
 @input_agent.on_event("startup")
@@ -47,8 +47,8 @@ class CustomInputResponse(Model):
 
 # input_protocol = Protocol("Custom Input")
 
-@input_agent.on_rest_post('/process-pdf',CustomInputRequest,CustomInputResponse)
-async def handle_custom_input(ctx: Context, msg: CustomInputRequest):
+@input_agent.on_query(model=CustomInputRequest,replies={CustomInputResponse})
+async def handle_custom_input(ctx: Context, sender:str, msg: CustomInputRequest):
     ctx.logger.info(msg)
     pdf_path = msg.pdf_path
     image_dir = msg.image_dir
