@@ -9,6 +9,7 @@ import requests
 from dotenv import load_dotenv
 from uagents import Agent, Context, Model, Protocol
 from uagents.setup import fund_agent_if_low
+from uagents.envelope import Envelope
 import time
 import nltk
 from nltk.tokenize import word_tokenize
@@ -25,38 +26,51 @@ print("This is your api key: ", GEMINI_API_KEY)
 genai.configure(api_key=GEMINI_API_KEY)
 # GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent'
 
-BASE_URL = "http://localhost:8001"
-
-input_agent = Agent(name="custom_input_handler", seed="custom_input_handler_seed", endpoint="http://127.0.0.1:8001", port=8001)
+input_agent = Agent(name="custom_input_handler", seed="custom_input_handler_seed", endpoint=["http://127.0.0.1:8001/submit"], port=8001)
 fund_agent_if_low(input_agent.wallet.address())
 
 @input_agent.on_event("startup")
 async def start_input_agent(ctx: Context):
-    ctx.logger.info(f"Input Handler Agent is starting up with address {ctx.agent.address}")
+    ctx.logger.info(f"Input Handler Agent is starting up with address {input_agent.address}")
     # req = CustomInputRequest(pdf_path="sample_pdfs/sample2.pdf", image_dir="extracted_images")
     # await ctx.send(ctx.agent.address, req)
 
-class CustomInputRequest(Model):
+class PDFProcessRequest(Model):
     pdf_path: str
     image_dir: str
 
-class CustomInputResponse(Model):
+class PDFInputResponse(Model):
     text_content: str
     num_images: int
     ocr_results: dict
 
+class TestResponse(Model):
+    response: str
+
+class ErrorResponse(Model):
+    error : str
+
 # input_protocol = Protocol("Custom Input")
 
-@input_agent.on_query(model=CustomInputRequest,replies={CustomInputResponse})
-async def handle_custom_input(ctx: Context, sender:str, msg: CustomInputRequest):
-    ctx.logger.info(msg)
-    pdf_path = msg.pdf_path
-    image_dir = msg.image_dir
-    text_content, num_images = extract_pdf_content(pdf_path, image_dir)
-    ocr_results = process_images_with_ocr(image_dir)
-    ctx.logger.info(f"OCR results from PDF: {ocr_results}")
-    return CustomInputResponse(text_content=text_content, num_images=num_images, ocr_results=ocr_results)
+@input_agent.on_query(model=PDFProcessRequest,replies={TestResponse})
+async def handle_custom_input(ctx: Context, sender:str, msg: PDFProcessRequest):
+    print("Received PDFProcessRequest")
+    try:
+        ctx.logger.info(msg.image_dir)
+        pdf_path = msg.pdf_path
+        image_dir = msg.image_dir
+        text_content, num_images = extract_pdf_content(pdf_path, image_dir)
+        ocr_results = process_images_with_ocr(image_dir)
+        ctx.logger.info(f"OCR results from PDF: {ocr_results}")
+        # await ctx.send(sender, PDFInputResponse(text_content=text_content, num_images=num_images, ocr_results=ocr_results))
+        await ctx.send(sender, TestResponse(response="PDF processed successfully"))
     # await ctx.send(sender, CustomInputResponse(text_content=text_content, num_images=num_images, ocr_results=ocr_results))
+    
+    except Exception as e:
+        error_message = f"Error fetching ocr details: {str(e)}"
+        ctx.logger.error(error_message)
+        # Ensure the error message is sent as a string
+        await ctx.send(sender, ErrorResponse(response=str(error_message)))
 
 
 
