@@ -26,6 +26,8 @@ const AIHomepage: React.FC = () => {
   const [currentUser, setCurrentUser] = useState('John Doe');
   const [todoList, setTodoList] = useState<TodoList>({});
 
+
+
   useEffect(() => {
     fetchTodoList();
     console.log(messages);
