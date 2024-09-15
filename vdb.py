@@ -25,8 +25,6 @@ from langchain_iris import IRISVector
 embeddings = OpenAIEmbeddings()
 # embeddings = FastEmbedEmbeddings()
 
-
-
 # db.add_documents(docs)
 
 def load_docs(folder_path):
@@ -72,7 +70,7 @@ def load_docs(folder_path):
     print(ret)
     
 
-def search_q(query, coll):
+def search_q(query, coll="canjson"):
     embeddings = OpenAIEmbeddings()
     username = 'demo'
     password = 'demo' 
@@ -89,10 +87,10 @@ def search_q(query, coll):
     connection_string=CONNECTION_STRING,
     )
     ret= db.similarity_search(query)
-    
+    print(ret)
     return ret
 # print(f"Number of docs in vector store: {len(db.get()['ids'])}")
 
-#search_q("how many exams are there in cmsc351")
+search_q("hi")
 
 # load_docs("files")

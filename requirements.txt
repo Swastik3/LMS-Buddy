@@ -5,4 +5,11 @@ langchain_iris
 python-dotenv
 bs4
 langchain
+PyMuPDF
+Pillow
+google-generativeai
+PyPDF2
 langchain_openai
+modal
+transformers
+torch
