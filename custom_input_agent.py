@@ -25,6 +25,17 @@ print("This is your api key: ", GEMINI_API_KEY)
 genai.configure(api_key=GEMINI_API_KEY)
 # GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent'
 
+BASE_URL = "http://localhost:8001"
+
+input_agent = Agent(name="custom_input_handler", seed="custom_input_handler_seed", endpoint="http://localhost:8001", port=8001)
+fund_agent_if_low(input_agent.wallet.address())
+
+@input_agent.on_event("startup")
+async def start_input_agent(ctx: Context):
+    ctx.logger.info(f"Input Handler Agent is starting up with address {ctx.agent.address}")
+    # req = CustomInputRequest(pdf_path="sample_pdfs/sample2.pdf", image_dir="extracted_images")
+    # await ctx.send(ctx.agent.address, req)
+
 class CustomInputRequest(Model):
     pdf_path: str
     image_dir: str
@@ -34,16 +45,18 @@ class CustomInputResponse(Model):
     num_images: int
     ocr_results: dict
 
-input_protocol = Protocol("Custom Input")
+# input_protocol = Protocol("Custom Input")
 
-@input_protocol.on_message(model=CustomInputRequest, replies = CustomInputResponse)
-async def handle_custom_input(ctx: Context, sender: str, msg: CustomInputRequest):
+@input_agent.on_rest_post('/process-pdf',CustomInputRequest,CustomInputResponse)
+async def handle_custom_input(ctx: Context, msg: CustomInputRequest):
+    ctx.logger.info(msg)
     pdf_path = msg.pdf_path
     image_dir = msg.image_dir
     text_content, num_images = extract_pdf_content(pdf_path, image_dir)
     ocr_results = process_images_with_ocr(image_dir)
     ctx.logger.info(f"OCR results from PDF: {ocr_results}")
-    await ctx.send(sender, CustomInputResponse(text_content=text_content, num_images=num_images, ocr_results=ocr_results))
+    return CustomInputResponse(text_content=text_content, num_images=num_images, ocr_results=ocr_results)
+    # await ctx.send(sender, CustomInputResponse(text_content=text_content, num_images=num_images, ocr_results=ocr_results))
 
 
 
@@ -150,18 +163,7 @@ def process_images_with_ocr(image_dir):
     return ocr_results
 
 
-#Defining the Agent
-input_agent = Agent(name="custom_input_handler", seed="custom_input_handler_seed", endpoint="http://localhost:8001", port=8001)
-input_agent.include(input_protocol)
-fund_agent_if_low(input_agent.wallet.address())
-
-@input_agent.on_event("startup")
-async def start_input_agent(ctx: Context):
-    ctx.logger.info(f"Input Handler Agent is starting up with address {ctx.agent.address}")
-    req = CustomInputRequest(pdf_path="sample_pdfs/sample2.pdf", image_dir="extracted_images")
-    await ctx.send(ctx.agent.address, req)
-
-
 # Example usage
 if __name__ == "__main__":
     input_agent.run()
+    
