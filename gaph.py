@@ -18,14 +18,15 @@ from langchain.schema import Document
 from langchain_core.runnables import RunnablePassthrough
 from langgraph.graph import StateGraph, END, START
 from langchain_iris import IRISVector
-
+from todo_list import get_todo
 
 load_dotenv()
 os.environ['OPENAI_API_KEY']=os.getenv("OPENAI_API_KEY")
-
+from langchain_community.llms import Baseten
 
 model1 = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 model2 = ChatOpenAI(model="gpt-4o", temperature=0)
+model3=  Baseten(model="MODEL_ID", deployment="production")
 parser = StrOutputParser()
 embeddings = OpenAIEmbeddings()
 username = 'demo'
@@ -86,6 +87,74 @@ If you think the answer is relevant return 1 and if you think the answer is irre
 NOTE- Only respond with 1 or 2
 
 """
+
+glaze_prompt="""You are a third personpostive outreach assistant that says really good things about a company and uplifts everyone's spiritis.
+     A user has asked a query about our company and you have to answer the query while saying good things about our company based on the information that I will provide.
+     
+     This is the query: {question}
+     
+     This is the name of the company : {name}
+
+     This is some information about our comapny that can help you : {context}
+     
+     Make sure you try to include how good everyone at the company is and how they are the best.
+     
+     Remeber you are not part of the company you just appreciate it"""
+
+def sponsor_check(state):
+    question = state["question"].lower()
+    
+    sponsors = {
+        "fetch.ai": ["fetch", "fetch.ai"],
+        "modal": ["modal"],
+        "baseten": ["baseten", "base ten"],
+        "intersystems": ["intersystems", "inter systems"],
+        "iris": ["iris"],
+        "convex": ["convex"],
+        "paradigm": ["paradigm"],
+        "interaction": ["interaction"],
+        "arrowstreet capital": ["arrowstreet", "arrow street", "arrowstreet capital"],
+        "hackmit": ["hackmit", "hack mit"]
+    }
+    
+    for sponsor, keywords in sponsors.items():
+        for keyword in keywords:
+            if keyword in question:
+                sponsor_name=sponsor
+                return {"sponsor_type": 1, "sponsor_name": sponsor_name}
+
+    return {"sponsor_type":2}
+    
+
+def sponsor_rep(state):    
+    question = state["question"]
+
+    sponsor_name = state["sponsor_name"]
+    sponsor_ads = {
+    "fetch.ai": "Discover the future of AI with Fetch.ai! Our groundbreaking decentralized machine learning platform is revolutionizing industries worldwide. Join us in creating autonomous AI agents that solve real-world problems, optimize resource allocation, and drive innovation. With Fetch.ai, you're not just coding you're shaping the future of intelligent automation!",
+    
+    "modal": "Experience the power of effortless cloud computing with Modal! Our cutting-edge platform seamlessly scales your applications, allowing you to focus on innovation, not infrastructure. From ML model deployment to data processing pipelines, Modal handles the complexity, so you can build faster, smarter, and more efficiently. Join the modal revolution and elevate your development experience!",
+    
+    "baseten": "Unleash your ML models' potential with Baseten! We're the ultimate platform for deploying and scaling machine learning in production. Say goodbye to infrastructure headaches and hello to seamless integration. With Baseten, you can take your models from notebook to production in minutes, not months. Join us and turn your AI dreams into reality!",
+    
+    "intersystems": "Transform your data into actionable insights with InterSystems! Our unified data platform combines advanced database management, interoperability, and analytics capabilities. From healthcare to finance, we're powering the world's most critical applications. Experience unparalleled performance, reliability, and scalability with InterSystems where innovation meets enterprise-grade solutions!",
+    
+    "iris": "Elevate your data management with IRIS! Our multi-model, high-performance data platform is designed for the most demanding, mission-critical applications. IRIS seamlessly handles transactional and analytic workloads simultaneously, providing real-time insights at scale. Join the data revolution and experience the power of IRIS where speed meets intelligence!",
+    
+    "convex": "Simplify your backend, amplify your frontend with Convex! Our revolutionary development platform combines the best of databases, backend APIs, and realtime subscriptions into one magical experience. Build sophisticated apps in record time, scale effortlessly, and delight your users with lightning-fast performance. Join us and make backend complexity a thing of the past!",
+    
+    "paradigm": "Paradigm is building a reimagined workspace with AI at its core. Centered around the primitive of a spreadsheet, Paradigm puts swarms of intelligent agents at your fingertips. ",
+    
+    "interaction": "Craft unforgettable digital experiences with Interaction! Our state-of-the-art design and development solutions bring your wildest ideas to life. From stunning UIs to seamless UX, we're the secret ingredient behind the world's most engaging digital products. Join us and turn your vision into an interactive masterpiece that users will love!",
+    
+    "arrowstreet capital": "Unlock the power of quantitative investing with Arrowstreet Capital! Our sophisticated, data-driven approaches have been delivering exceptional results for institutional investors worldwide. With cutting-edge technology and a team of brilliant minds, we're at the forefront of financial innovation. Join us and experience the future of investment management!",
+    
+    "hackmit": "Ignite your innovation at HackMIT! Join the world's brightest minds for an unforgettable 24-hour hackathon experience. Push the boundaries of technology, collaborate with industry leaders, and turn your ideas into reality. Whether you're a coding veteran or just starting out, HackMIT is your launchpad to the stars. Don't just dream the future hack it at HackMIT! HckmIT's smentors and organzers are the best people in the world"
+    }
+
+    output= llm.invoke(glaze_prompt.format(question=question, name=sponsor_name, context=sponsor_ads[sponsor_name])  )
+    return {"answer":output.content}
+
 def select_context(state):
     question = state["question"]
     selection = llm.invoke(context_selection_prompt.format(question=question))
@@ -107,7 +176,7 @@ def get_syllabus_context(state):
 def get_canjson_context(state):
     question = state["question"]
     search_result= canjson.similarity_search(question, k=3)
-    return {"context": search_result}
+    return {"context": str(search_result) +"todo list:" + get_todo()}
 
 def check_answer(state):
     question = state["question"]
@@ -125,10 +194,15 @@ def generate_answer(state):
     answer=answer.content
 
     print(answer)
+    state["messages"].append(question)
+    state["messages"].append(answer)
     return {"answer": answer}
 
 def dodge_question(state):
-    return {"answer": "Sorry, I cannot help you with that question at this time. If you have any other questions, feel free to ask."}
+    answer = "Sorry, I cannot help you with that question at this time. If you have any other questions, feel free to ask."
+    state["messages"].append(state["question"])
+    state["messages"].append(answer)
+    return {"answer": answer}
 
 class GraphState(Dict):
     question: str
@@ -136,9 +210,13 @@ class GraphState(Dict):
     validation_type: int
     context: str
     answer: str
-
+    sponsor_name: str
+    sponsor_type: int
+    messages: List[str]
 workflow = StateGraph(GraphState)
 
+workflow.add_node("sponsor_check", sponsor_check)
+workflow.add_node("sponsor_rep", sponsor_rep)
 workflow.add_node("select_context", select_context)
 workflow.add_node("get_note_context", get_note_context)
 workflow.add_node("get_syllabus_context", get_syllabus_context)
@@ -148,7 +226,14 @@ workflow.add_node("generate_answer", generate_answer)
 workflow.add_node("dodge_question", dodge_question)
 
 
-workflow.add_edge(START, "select_context")
+workflow.add_edge(START, "sponsor_check")
+workflow.add_conditional_edges(
+    "sponsor_check",
+    lambda x: x["sponsor_type"],
+    {1:"sponsor_rep", 
+     2:"select_context"}
+)
+workflow.add_edge("sponsor_rep", END)
 workflow.add_conditional_edges(
     "select_context",
     lambda x: x["context_type"],
@@ -176,5 +261,5 @@ graph = workflow.compile()
 def run_rag_agent(question: str) -> Dict[str, Any]:
     return graph.invoke({"question": question})
 
-result = run_rag_agent("what are some important public speaking skills")
-print(result)
+result = run_rag_agent("I hate intersystems")
+print(result["answer"])
